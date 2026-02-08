@@ -28,7 +28,7 @@ public class RequirementsCsvImporter {
     @Transactional
     public void importCsv(InputStream inputStream) throws Exception {
         try (CSVReader reader = new CSVReader(
-                new InputStreamReader(inputStream, "UTF-8"))) {  // <-- usa inputStream directo "UTF-8"))) {
+                new InputStreamReader(inputStream, "UTF-8"))) {
 
             String[] line;
             reader.readNext(); // saltar cabecera
@@ -36,10 +36,19 @@ public class RequirementsCsvImporter {
 
             while ((line = reader.readNext()) != null) {
                 Long appId = Long.parseLong(line[0]);
+
+                // Usar findById (porque appId es @Id)
                 Game game = gameRepo.findById(appId).orElse(null);
 
-                if (game == null) continue; // saltar si el juego no existe
-                if (requirementsRepo.existsByGame(game)) continue; // evitar duplicados
+                if (game == null) {
+                    System.out.println("Juego con appId " + appId + " no encontrado, saltando requisitos...");
+                    continue;
+                }
+
+                if (requirementsRepo.existsByGame(game)) {
+                    System.out.println("Requisitos ya existen para juego appId " + appId + ", saltando...");
+                    continue;
+                }
 
                 GameRequirements gr = new GameRequirements();
                 gr.setGame(game);
@@ -60,6 +69,8 @@ public class RequirementsCsvImporter {
             if (!batch.isEmpty()) {
                 requirementsRepo.saveAll(batch);
             }
+
+            System.out.println("Requisitos importados: " + batch.size() + " registros");
         }
     }
 }

@@ -50,6 +50,8 @@ public class TagCsvImporter {
 
                 try {
                     Long appId = Long.parseLong(line[0].trim());
+
+                    // Usar findById (porque appId es @Id)
                     Game game = gameRepo.findById(appId).orElse(null);
 
                     if (game == null) {
@@ -69,9 +71,10 @@ public class TagCsvImporter {
                                         return tagRepo.save(newTag);
                                     });
 
-                            // SOLO agregar al juego (relación unidireccional)
-                            game.getTags().add(tag);
-                            hasTags = true;
+                            if (!game.getTags().contains(tag)) {
+                                game.getTags().add(tag);
+                                hasTags = true;
+                            }
                         }
                     }
 

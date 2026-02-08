@@ -13,8 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class GameCsvImporter {
@@ -34,7 +33,7 @@ public class GameCsvImporter {
     @Autowired
     private TagRepository tagRepo;
 
-    private static final int BATCH_SIZE = 50;
+    private static final int BATCH_SIZE = 100;
 
     @Transactional
     public void importCsv(InputStream inputStream) throws Exception {
@@ -67,13 +66,14 @@ public class GameCsvImporter {
                         continue;
                     }
 
+                    // Verificar si ya existe - usando findById (porque appId es @Id)
                     if (gameRepo.existsById(appId)) {
-                        System.out.println("Game " + appId + " already exists, skipping...");
+                        System.out.println("Game with appId " + appId + " already exists, skipping...");
                         continue;
                     }
 
                     Game game = new Game();
-                    game.setAppId(appId);
+                    game.setAppId(appId);  // ← Ahora SÍ puedes establecerlo manualmente
                     game.setTitle(line[1] != null ? line[1].trim() : "");
 
                     // release_date
@@ -88,7 +88,7 @@ public class GameCsvImporter {
                     // english
                     game.setEnglish("1".equals(line[3] != null ? line[3].trim() : ""));
 
-                    // developers (SOLO agregar al juego)
+                    // developers
                     if (line[4] != null && !line[4].trim().isEmpty()) {
                         for (String devName : line[4].split(";")) {
                             devName = devName.trim();
@@ -96,17 +96,12 @@ public class GameCsvImporter {
 
                             String finalDevName = devName;
                             Developer dev = developerRepo.findByName(devName)
-                                    .orElseGet(() -> {
-                                        Developer newDev = new Developer(finalDevName);
-                                        return developerRepo.save(newDev);
-                                    });
-
-                            game.getDevelopers().add(dev);
-                            // ELIMINADO: dev.getGames().add(game);
+                                    .orElseGet(() -> developerRepo.save(new Developer(finalDevName)));
+                            game.addDeveloper(dev);
                         }
                     }
 
-                    // publishers (SOLO agregar al juego)
+                    // publishers
                     if (line[5] != null && !line[5].trim().isEmpty()) {
                         for (String pubName : line[5].split(";")) {
                             pubName = pubName.trim();
@@ -114,17 +109,12 @@ public class GameCsvImporter {
 
                             String finalPubName = pubName;
                             Publisher pub = publisherRepo.findByName(pubName)
-                                    .orElseGet(() -> {
-                                        Publisher newPub = new Publisher(finalPubName);
-                                        return publisherRepo.save(newPub);
-                                    });
-
-                            game.getPublishers().add(pub);
-                            // ELIMINADO: pub.getGames().add(game);
+                                    .orElseGet(() -> publisherRepo.save(new Publisher(finalPubName)));
+                            game.addPublisher(pub);
                         }
                     }
 
-                    // platforms (SOLO agregar al juego)
+                    // platforms
                     if (line[6] != null && !line[6].trim().isEmpty()) {
                         for (String platName : line[6].split(";")) {
                             platName = platName.trim();
@@ -132,13 +122,8 @@ public class GameCsvImporter {
 
                             String finalPlatName = platName;
                             Platform platform = platformRepo.findByName(platName)
-                                    .orElseGet(() -> {
-                                        Platform newPlatform = new Platform(finalPlatName);
-                                        return platformRepo.save(newPlatform);
-                                    });
-
-                            game.getPlatforms().add(platform);
-                            // ELIMINADO: platform.getGames().add(game);
+                                    .orElseGet(() -> platformRepo.save(new Platform(finalPlatName)));
+                            game.addPlatform(platform);
                         }
                     }
 
@@ -151,24 +136,20 @@ public class GameCsvImporter {
                         }
                     }
 
-                    // categories (solo la primera)
+                    // categories
                     if (line[8] != null && !line[8].trim().isEmpty()) {
                         String[] categories = line[8].split(";");
                         if (categories.length > 0) {
                             String catName = categories[0].trim();
                             if (!catName.isEmpty()) {
                                 Category category = categoryRepo.findByName(catName)
-                                        .orElseGet(() -> {
-                                            Category newCategory = new Category(catName);
-                                            return categoryRepo.save(newCategory);
-                                        });
+                                        .orElseGet(() -> categoryRepo.save(new Category(catName)));
                                 game.setCategory(category);
-                                // ELIMINADO: category.getGames().add(game);
                             }
                         }
                     }
 
-                    // genres (SOLO agregar al juego)
+                    // genres
                     if (line[9] != null && !line[9].trim().isEmpty()) {
                         for (String genreName : line[9].split(";")) {
                             genreName = genreName.trim();
@@ -176,17 +157,12 @@ public class GameCsvImporter {
 
                             String finalGenreName = genreName;
                             Genre genre = genreRepo.findByName(genreName)
-                                    .orElseGet(() -> {
-                                        Genre newGenre = new Genre(finalGenreName);
-                                        return genreRepo.save(newGenre);
-                                    });
-
-                            game.getGenres().add(genre);
-                            // ELIMINADO: genre.getGames().add(game);
+                                    .orElseGet(() -> genreRepo.save(new Genre(finalGenreName)));
+                            game.addGenre(genre);
                         }
                     }
 
-                    // steamspy_tags (SOLO agregar al juego)
+                    // steamspy_tags
                     if (line[10] != null && !line[10].trim().isEmpty()) {
                         for (String tagName : line[10].split(";")) {
                             tagName = tagName.trim();
@@ -194,13 +170,8 @@ public class GameCsvImporter {
 
                             String finalTagName = tagName;
                             Tag tag = tagRepo.findByName(tagName)
-                                    .orElseGet(() -> {
-                                        Tag newTag = new Tag(finalTagName);
-                                        return tagRepo.save(newTag);
-                                    });
-
-                            game.getTags().add(tag);
-                            // ELIMINADO: tag.getGames().add(game);
+                                    .orElseGet(() -> tagRepo.save(new Tag(finalTagName)));
+                            game.addTag(tag);
                         }
                     }
 

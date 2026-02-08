@@ -1,12 +1,13 @@
 package com.paucasesnoves.steamAPI.modules.csv.service;
+
 import com.opencsv.CSVReader;
 import com.paucasesnoves.steamAPI.modules.games.domain.Game;
 import com.paucasesnoves.steamAPI.modules.games.domain.GameDescription;
 import com.paucasesnoves.steamAPI.modules.games.repository.GameDescriptionRepository;
 import com.paucasesnoves.steamAPI.modules.games.repository.GameRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.stereotype.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,7 +28,7 @@ public class DescriptionCsvImporter {
     @Transactional
     public void importCsv(InputStream inputStream) throws Exception {
         try (CSVReader reader = new CSVReader(
-                new InputStreamReader(inputStream, "UTF-8"))) {  // <-- usa inputStream directo
+                new InputStreamReader(inputStream, "UTF-8"))) {
 
             String[] line;
             reader.readNext(); // saltar cabecera
@@ -35,10 +36,19 @@ public class DescriptionCsvImporter {
 
             while ((line = reader.readNext()) != null) {
                 Long appId = Long.parseLong(line[0]);
+
+                // Usar findById (porque appId es @Id)
                 Game game = gameRepo.findById(appId).orElse(null);
 
-                if (game == null) continue; // saltar descripciones de juegos que no existen
-                if (descriptionRepo.existsByGame(game)) continue; // evitar duplicados
+                if (game == null) {
+                    System.out.println("Juego con appId " + appId + " no encontrado, saltando descripción...");
+                    continue;
+                }
+
+                if (descriptionRepo.existsByGame(game)) {
+                    System.out.println("Descripción ya existe para juego appId " + appId + ", saltando...");
+                    continue;
+                }
 
                 String detailed = line[1];
                 String about = line[2];
@@ -61,6 +71,8 @@ public class DescriptionCsvImporter {
             if (!batch.isEmpty()) {
                 descriptionRepo.saveAll(batch);
             }
+
+            System.out.println("Descripciones importadas: " + batch.size() + " registros");
         }
     }
 }

@@ -11,8 +11,8 @@ import java.util.Set;
 public class Game {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long appId;
+    @Column(name = "app_id", unique = true, nullable = false)
+    private Long appId;  // ← SOLUCIÓN: SIN @GeneratedValue
 
     private String title;
     private LocalDate releaseDate;
@@ -72,7 +72,16 @@ public class Game {
     )
     private Set<Publisher> publishers = new HashSet<>();
 
-    // Getters y Setters (todos)
+    // Constructores
+    public Game() {
+        this.genres = new HashSet<>();
+        this.tags = new HashSet<>();
+        this.platforms = new HashSet<>();
+        this.developers = new HashSet<>();
+        this.publishers = new HashSet<>();
+    }
+
+    // Getters y Setters
     public Long getAppId() { return appId; }
     public void setAppId(Long appId) { this.appId = appId; }
 
@@ -132,4 +141,25 @@ public class Game {
 
     public Set<Publisher> getPublishers() { return publishers; }
     public void setPublishers(Set<Publisher> publishers) { this.publishers = publishers; }
+
+    // Métodos útiles
+    public void addGenre(Genre genre) {
+        this.genres.add(genre);
+    }
+
+    public void addTag(Tag tag) {
+        this.tags.add(tag);
+    }
+
+    public void addPlatform(Platform platform) {
+        this.platforms.add(platform);
+    }
+
+    public void addDeveloper(Developer developer) {
+        this.developers.add(developer);
+    }
+
+    public void addPublisher(Publisher publisher) {
+        this.publishers.add(publisher);
+    }
 }

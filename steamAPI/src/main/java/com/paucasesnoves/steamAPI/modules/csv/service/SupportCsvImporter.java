@@ -34,9 +34,19 @@ public class SupportCsvImporter {
 
             while ((line = reader.readNext()) != null) {
                 Long appId = Long.parseLong(line[0]);
+
+                // Usar findById (porque appId es @Id)
                 Game game = gameRepo.findById(appId).orElse(null);
-                if (game == null) continue;
-                if (supportRepo.existsByGame(game)) continue;
+
+                if (game == null) {
+                    System.out.println("Juego con appId " + appId + " no encontrado, saltando soporte...");
+                    continue;
+                }
+
+                if (supportRepo.existsByGame(game)) {
+                    System.out.println("Soporte ya existe para juego appId " + appId + ", saltando...");
+                    continue;
+                }
 
                 GameSupportInfo info = new GameSupportInfo();
                 info.setGame(game);
@@ -55,6 +65,8 @@ public class SupportCsvImporter {
             if (!batch.isEmpty()) {
                 supportRepo.saveAll(batch);
             }
+
+            System.out.println("Información de soporte importada: " + batch.size() + " registros");
         }
     }
 }

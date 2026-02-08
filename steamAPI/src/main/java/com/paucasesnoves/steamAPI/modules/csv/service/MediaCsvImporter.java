@@ -28,7 +28,7 @@ public class MediaCsvImporter {
     @Transactional
     public void importCsv(InputStream inputStream) throws Exception {
         try (CSVReader reader = new CSVReader(
-                new InputStreamReader(inputStream, "UTF-8"))) {  // <-- usa inputStream directo "UTF-8"))) {
+                new InputStreamReader(inputStream, "UTF-8"))) {
 
             String[] line;
             reader.readNext(); // saltar cabecera
@@ -36,10 +36,19 @@ public class MediaCsvImporter {
 
             while ((line = reader.readNext()) != null) {
                 Long appId = Long.parseLong(line[0]);
+
+                // Usar findById (porque appId es @Id)
                 Game game = gameRepo.findById(appId).orElse(null);
 
-                if (game == null) continue; // saltar si el juego no existe
-                if (mediaRepo.existsByGame(game)) continue; // evitar duplicados
+                if (game == null) {
+                    System.out.println("Juego con appId " + appId + " no encontrado, saltando media...");
+                    continue;
+                }
+
+                if (mediaRepo.existsByGame(game)) {
+                    System.out.println("Media ya existe para juego appId " + appId + ", saltando...");
+                    continue;
+                }
 
                 GameMedia media = new GameMedia();
                 media.setGame(game);
@@ -59,6 +68,8 @@ public class MediaCsvImporter {
             if (!batch.isEmpty()) {
                 mediaRepo.saveAll(batch);
             }
+
+            System.out.println("Media importada: " + batch.size() + " registros");
         }
     }
 
