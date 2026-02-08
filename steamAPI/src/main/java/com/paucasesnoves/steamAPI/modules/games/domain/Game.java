@@ -12,9 +12,11 @@ public class Game {
 
     @Id
     @Column(name = "app_id", unique = true, nullable = false)
-    private Long appId;  // ← SOLUCIÓN: SIN @GeneratedValue
+    private Long appId;  // ← ¡SIN @GeneratedValue!
 
+    @Column(nullable = false)
     private String title;
+
     private LocalDate releaseDate;
     private boolean english;
     private Integer minAge;
@@ -26,9 +28,13 @@ public class Game {
     private Integer ownersLower;
     private Integer ownersUpper;
     private Integer ownersMid;
+
+    @Column(precision = 10, scale = 2)
     private BigDecimal price;
 
-    @ManyToMany
+    // ========== RELACIONES MANY-TO-MANY ==========
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "game_genre",
             joinColumns = @JoinColumn(name = "game_id"),
@@ -36,7 +42,7 @@ public class Game {
     )
     private Set<Genre> genres = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "game_tag",
             joinColumns = @JoinColumn(name = "game_id"),
@@ -44,11 +50,7 @@ public class Game {
     )
     private Set<Tag> tags = new HashSet<>();
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "game_platform",
             joinColumns = @JoinColumn(name = "game_id"),
@@ -56,7 +58,7 @@ public class Game {
     )
     private Set<Platform> platforms = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "game_developer",
             joinColumns = @JoinColumn(name = "game_id"),
@@ -64,7 +66,7 @@ public class Game {
     )
     private Set<Developer> developers = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "game_publisher",
             joinColumns = @JoinColumn(name = "game_id"),
@@ -72,16 +74,25 @@ public class Game {
     )
     private Set<Publisher> publishers = new HashSet<>();
 
-    // Constructores
+    // ========== RELACIÓN MANY-TO-ONE ==========
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    // ========== CONSTRUCTORES ==========
+
     public Game() {
-        this.genres = new HashSet<>();
-        this.tags = new HashSet<>();
-        this.platforms = new HashSet<>();
-        this.developers = new HashSet<>();
-        this.publishers = new HashSet<>();
+        // Constructor vacío requerido por JPA
     }
 
-    // Getters y Setters
+    public Game(Long appId, String title) {
+        this.appId = appId;
+        this.title = title;
+    }
+
+    // ========== GETTERS Y SETTERS ==========
+
     public Long getAppId() { return appId; }
     public void setAppId(Long appId) { this.appId = appId; }
 
@@ -142,7 +153,8 @@ public class Game {
     public Set<Publisher> getPublishers() { return publishers; }
     public void setPublishers(Set<Publisher> publishers) { this.publishers = publishers; }
 
-    // Métodos útiles
+    // ========== MÉTODOS UTILITARIOS ==========
+
     public void addGenre(Genre genre) {
         this.genres.add(genre);
     }
@@ -161,5 +173,28 @@ public class Game {
 
     public void addPublisher(Publisher publisher) {
         this.publishers.add(publisher);
+    }
+
+    @Override
+    public String toString() {
+        return "Game{" +
+                "appId=" + appId +
+                ", title='" + title + '\'' +
+                ", releaseDate=" + releaseDate +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Game game = (Game) o;
+        return appId != null ? appId.equals(game.appId) : game.appId == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return appId != null ? appId.hashCode() : 0;
     }
 }
