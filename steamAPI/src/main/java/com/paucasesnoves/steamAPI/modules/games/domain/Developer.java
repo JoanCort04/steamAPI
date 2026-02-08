@@ -1,8 +1,6 @@
 package com.paucasesnoves.steamAPI.modules.games.domain;
 
 import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "developers")
@@ -14,9 +12,6 @@ public class Developer {
 
     @Column(unique = true, nullable = false)
     private String name;
-
-    @OneToMany(mappedBy = "developer")
-    private Set<Game> games = new HashSet<>();
 
     public Developer() {}
 
@@ -38,13 +33,5 @@ public class Developer {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Set<Game> getGames() {
-        return games;
-    }
-
-    public void setGames(Set<Game> games) {
-        this.games = games;
     }
 }

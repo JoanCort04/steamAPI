@@ -1,9 +1,6 @@
 package com.paucasesnoves.steamAPI.modules.games.domain;
 
 import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "categories")
@@ -16,16 +13,11 @@ public class Category {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "category")
-    private Set<Game> games = new HashSet<>();
-
     public Category() {}
 
     public Category(String name) {
         this.name = name;
     }
-
-
 
     public Long getId() {
         return id;
@@ -41,13 +33,5 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Set<Game> getGames() {
-        return games;
-    }
-
-    public void setGames(Set<Game> games) {
-        this.games = games;
     }
 }

@@ -1,6 +1,6 @@
 package com.paucasesnoves.steamAPI.modules.games.domain;
-import jakarta.persistence.*;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -13,6 +13,7 @@ public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long appId;
+
     private String title;
     private LocalDate releaseDate;
     private boolean english;
@@ -28,23 +29,40 @@ public class Game {
     private BigDecimal price;
 
     @ManyToMany
+    @JoinTable(
+            name = "game_genre",
+            joinColumns = @JoinColumn(name = "game_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
     private Set<Genre> genres = new HashSet<>();
 
     @ManyToMany
+    @JoinTable(
+            name = "game_tag",
+            joinColumns = @JoinColumn(name = "game_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
     private Set<Tag> tags = new HashSet<>();
 
-    // Este es el campo que le falta a Hibernate
     @ManyToOne
-    @JoinColumn(name = "category_id") // FK hacia Category
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @ManyToMany
+    @JoinTable(
+            name = "game_platform",
+            joinColumns = @JoinColumn(name = "game_id"),
+            inverseJoinColumns = @JoinColumn(name = "platform_id")
+    )
     private Set<Platform> platforms = new HashSet<>();
 
-    @ManyToOne
-    @JoinColumn(name = "developer_id")
-    private Developer developer;
-
+    @ManyToMany
+    @JoinTable(
+            name = "game_developer",
+            joinColumns = @JoinColumn(name = "game_id"),
+            inverseJoinColumns = @JoinColumn(name = "developer_id")
+    )
+    private Set<Developer> developers = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -54,175 +72,64 @@ public class Game {
     )
     private Set<Publisher> publishers = new HashSet<>();
 
-    public Set<Publisher> getPublishers() {
-        return publishers;
-    }
+    // Getters y Setters (todos)
+    public Long getAppId() { return appId; }
+    public void setAppId(Long appId) { this.appId = appId; }
 
-    public void setPublishers(Set<Publisher> publishers) {
-        this.publishers = publishers;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public Long getId() {
-        return appId;
-    }
+    public LocalDate getReleaseDate() { return releaseDate; }
+    public void setReleaseDate(LocalDate releaseDate) { this.releaseDate = releaseDate; }
 
-    public void setId(Long appId) {
-        this.appId = appId;
-    }
+    public boolean isEnglish() { return english; }
+    public void setEnglish(boolean english) { this.english = english; }
 
-    public String getTitle() {
-        return title;
-    }
+    public Integer getMinAge() { return minAge; }
+    public void setMinAge(Integer minAge) { this.minAge = minAge; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public Integer getAchievements() { return achievements; }
+    public void setAchievements(Integer achievements) { this.achievements = achievements; }
 
-    public LocalDate getReleaseDate() {
-        return releaseDate;
-    }
+    public Integer getPositiveRatings() { return positiveRatings; }
+    public void setPositiveRatings(Integer positiveRatings) { this.positiveRatings = positiveRatings; }
 
-    public void setReleaseDate(LocalDate releaseDate) {
-        this.releaseDate = releaseDate;
-    }
+    public Integer getNegativeRatings() { return negativeRatings; }
+    public void setNegativeRatings(Integer negativeRatings) { this.negativeRatings = negativeRatings; }
 
-    public boolean isEnglish() {
-        return english;
-    }
+    public Double getAvgPlaytime() { return avgPlaytime; }
+    public void setAvgPlaytime(Double avgPlaytime) { this.avgPlaytime = avgPlaytime; }
 
-    public void setEnglish(boolean english) {
-        this.english = english;
-    }
+    public Double getMedianPlaytime() { return medianPlaytime; }
+    public void setMedianPlaytime(Double medianPlaytime) { this.medianPlaytime = medianPlaytime; }
 
-    public Integer getMinAge() {
-        return minAge;
-    }
+    public Integer getOwnersLower() { return ownersLower; }
+    public void setOwnersLower(Integer ownersLower) { this.ownersLower = ownersLower; }
 
-    public void setMinAge(Integer minAge) {
-        this.minAge = minAge;
-    }
+    public Integer getOwnersUpper() { return ownersUpper; }
+    public void setOwnersUpper(Integer ownersUpper) { this.ownersUpper = ownersUpper; }
 
-    public Integer getAchievements() {
-        return achievements;
-    }
+    public Integer getOwnersMid() { return ownersMid; }
+    public void setOwnersMid(Integer ownersMid) { this.ownersMid = ownersMid; }
 
-    public void setAchievements(Integer achievements) {
-        this.achievements = achievements;
-    }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
-    public Integer getPositiveRatings() {
-        return positiveRatings;
-    }
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 
-    public void setPositiveRatings(Integer positiveRatings) {
-        this.positiveRatings = positiveRatings;
-    }
+    public Set<Genre> getGenres() { return genres; }
+    public void setGenres(Set<Genre> genres) { this.genres = genres; }
 
-    public Integer getNegativeRatings() {
-        return negativeRatings;
-    }
+    public Set<Tag> getTags() { return tags; }
+    public void setTags(Set<Tag> tags) { this.tags = tags; }
 
-    public void setNegativeRatings(Integer negativeRatings) {
-        this.negativeRatings = negativeRatings;
-    }
+    public Set<Platform> getPlatforms() { return platforms; }
+    public void setPlatforms(Set<Platform> platforms) { this.platforms = platforms; }
 
-    public Double getAvgPlaytime() {
-        return avgPlaytime;
-    }
+    public Set<Developer> getDevelopers() { return developers; }
+    public void setDevelopers(Set<Developer> developers) { this.developers = developers; }
 
-    public void setAvgPlaytime(Double avgPlaytime) {
-        this.avgPlaytime = avgPlaytime;
-    }
-
-    public Double getMedianPlaytime() {
-        return medianPlaytime;
-    }
-
-    public void setMedianPlaytime(Double medianPlaytime) {
-        this.medianPlaytime = medianPlaytime;
-    }
-
-    public Integer getOwnersLower() {
-        return ownersLower;
-    }
-
-    public void setOwnersLower(Integer ownersLower) {
-        this.ownersLower = ownersLower;
-    }
-
-    public Integer getOwnersUpper() {
-        return ownersUpper;
-    }
-
-    public void setOwnersUpper(Integer ownersUpper) {
-        this.ownersUpper = ownersUpper;
-    }
-
-    public Integer getOwnersMid() {
-        return ownersMid;
-    }
-
-    public void setOwnersMid(Integer ownersMid) {
-        this.ownersMid = ownersMid;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Set<Genre> getGenres() {
-        return genres;
-    }
-
-    public void setGenres(Set<Genre> genres) {
-        this.genres = genres;
-    }
-
-    public Set<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(Set<Tag> tags) {
-        this.tags = tags;
-    }
-
-
-    public Long getAppId() {
-        return appId;
-    }
-
-    public void setAppId(Long appId) {
-        this.appId = appId;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public Set<Platform> getPlatforms() {
-        return platforms;
-    }
-
-    public void setPlatforms(Set<Platform> platforms) {
-        this.platforms = platforms;
-    }
-
-
-    public Developer getDeveloper() {
-        return developer;
-    }
-
-    public void setDeveloper(Developer developer) {
-        this.developer = developer;
-    }
-
-
+    public Set<Publisher> getPublishers() { return publishers; }
+    public void setPublishers(Set<Publisher> publishers) { this.publishers = publishers; }
 }

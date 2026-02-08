@@ -1,7 +1,6 @@
 package com.paucasesnoves.steamAPI.modules.games.domain;
 
 import jakarta.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "genres")
@@ -13,9 +12,6 @@ public class Genre {
 
     @Column(unique = true, nullable = false)
     private String name;
-
-    @ManyToMany(mappedBy = "genres")
-    private Set<Game> games;
 
     public Genre() {}
 
@@ -37,13 +33,5 @@ public class Genre {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Set<Game> getGames() {
-        return games;
-    }
-
-    public void setGames(Set<Game> games) {
-        this.games = games;
     }
 }
